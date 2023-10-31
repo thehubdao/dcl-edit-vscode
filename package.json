@@ -1,0 +1,88 @@
+{
+  "name": "dcl-edit-vscode",
+  "displayName": "dcl-edit-vscode",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.83.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dcl-edit-activitybar",
+          "title": "Dcl Edit",
+          "icon": "media/sidebar.svg"
+        }
+      ]
+    },
+    "views": {
+      "dcl-edit-activitybar": [
+        {
+          "type": "webview",
+          "id": "dcl-edit-view",
+          "name": "DCL Edit",
+          "icon": "media/sidebar.svg",
+          "contextualTitle": "DCL Edit version"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "dcl-edit-view",
+        "contents": "Something went wrong"
+      }
+    ],
+    "commands": [
+      {
+        "command": "dcl-edit-vscode.download",
+        "title": "Dcl Edit: Download"
+      },
+      {
+        "command": "dcl-edit-vscode.start",
+        "title": "Dcl Edit: Start"
+      },
+      {
+        "command": "dcl-edit-vscode.clearCache",
+        "title": "Dcl Edit: Clear Download Cache"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "node ./esbuild.js",
+    "package": "NODE_ENV=production node ./esbuild.js",
+    "watch": "node ./esbuild.js --watch",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.0.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/targz": "^1.0.3",
+    "@types/vscode": "^1.83.0",
+    "@types/vscode-webview": "^1.57.3",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "@vscode/test-electron": "^2.2.0",
+    "esbuild": "^0.16.17",
+    "eslint": "^8.28.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.1.0",
+    "typescript": "^4.9.3"
+  },
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^1.2.2",
+    "axios": "^1.6.0",
+    "targz": "^1.0.1"
+  }
+}
