@@ -4,16 +4,18 @@ import * as fs from 'fs';
 import axios from 'axios';
 import * as targz from 'targz';
 import { Version } from './version';
+import * as cp from 'child_process';
 
 export class Downloader {
     private static _context: vscode.ExtensionContext;
-    private static _selectedVersion: string;
+
+    public static onDidChangeDownload: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
 
     static init(context: vscode.ExtensionContext) {
         this._context = context;
     }
 
-    private static getCurrentPlatform(): string | undefined {
+    private static getCurrentPlatform(): { platform: string, binary: string } | undefined {
         let platformName = '';
         let binaryName = '';
 
@@ -34,7 +36,7 @@ export class Downloader {
             return undefined;
         }
 
-        return platformName;
+        return { platform: platformName, binary: binaryName };
     }
 
     private static getBinaryPath(): string {
@@ -49,8 +51,13 @@ export class Downloader {
     private static getSpecificBinaryPath(version: string): string {
         // get the path to the downloaded binary
         const binaryPath = this.getBinaryPath();
-        const folder = binaryPath + `dcl-edit-${version}-${this.getCurrentPlatform()}`;
+        const folder = binaryPath + `dcl-edit-${version}-${this.getCurrentPlatform()?.platform}`;
         return folder + '/';
+    }
+
+    private static getBinary(version: string): string {
+        // get the path to the downloaded binary
+        return this.getSpecificBinaryPath(version) + this.getCurrentPlatform()?.binary;
     }
 
     public static async getNewestVersion(): Promise<string> {
@@ -71,11 +78,11 @@ export class Downloader {
     }
 
     public static async download(version?: string) {
-        if (!version) {throw new Error("Version not specified");}
+        if (!version) { throw new Error("Version not specified"); }
 
         return new Promise<void>((resolve, reject) => {
             // gather platform information
-            var platformName = Downloader.getCurrentPlatform();
+            var platformName = Downloader.getCurrentPlatform()?.platform;
             if (!platformName) { reject("Platform not supported"); }
 
             // download the binary without the binary install package
@@ -92,16 +99,43 @@ export class Downloader {
                     dest: folder
                 }, (err) => {
                     if (err) {
+                        this.onDidChangeDownload.fire();
                         reject(err);
                     } else {
                         fs.rmSync(filePath);
                         console.log("Downloaded dcl-edit version " + version + " to " + folder);
+                        this.onDidChangeDownload.fire();
                         resolve();
                     }
                 });
             }).catch(error => {
+                this.onDidChangeDownload.fire();
                 reject(error);
             });
+        });
+    }
+
+    public static start(version?: string) {
+        if (!version) { throw new Error("Version not specified"); }
+
+        // get the path to the downloaded binary
+        var binaryPath = this.getBinary(version);
+
+        // start the binary
+        console.log("Starting " + binaryPath + " with project path " + vscode.workspace.workspaceFolders![0].uri.fsPath);
+        cp.execFile(binaryPath, ["--projectPath", vscode.workspace.workspaceFolders![0].uri.fsPath],(error: cp.ExecFileException | null, stdout: string, stderr: string) => {
+            if (error) {
+                console.error(`dcl-edit error: ${error.message}`);
+                return;
+            }
+            if (stderr) {
+                console.error(`dcl-edit stderr: ${stderr}`);
+                return;
+            }
+            if (stdout) {
+                console.log(`dcl-edit stdout: ${stdout}`);
+                return;
+            }
         });
     }
 
@@ -110,7 +144,7 @@ export class Downloader {
         return new Promise<Version[]>((resolve, reject) => {
             axios.get(link).then(response => {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                resolve(response.data.map((release: {tag_name:string}) => {return new Version(release.tag_name);}));
+                resolve(response.data.map((release: { tag_name: string }) => { return new Version(release.tag_name); }));
             }).catch(error => {
                 reject(error);
             });
@@ -123,6 +157,7 @@ export class Downloader {
             const binaryPath = this.getBinaryPath();
             fs.rm(binaryPath, { recursive: true }, () => {
                 this.getBinaryPath();
+                this.onDidChangeDownload.fire();
                 resolve();
             });
         });

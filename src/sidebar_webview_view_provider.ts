@@ -41,6 +41,11 @@ export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
 		Version.onDidChangeVersion.event(() => {
 			this.updateWebview();
 		});
+
+		// Handle download changes
+		Downloader.onDidChangeDownload.event(() => {
+			this.updateWebview();
+		});
 	}
 
 	private updateWebview(): void {
@@ -157,7 +162,7 @@ export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
 		const isSelectedTag = isSelected ? "selected" : "";
 		const isDownloaded = Downloader.isDownloaded(version.getVersionString());
 		const isDownloadedTag = isDownloaded ? "(downloaded)" : "";
-		
+
 		return /*html*/`
 		<vscode-option value="${version.get()}" ${isSelectedTag}>${version.get()} ${isDownloadedTag}</vscode-option>
 		`;
