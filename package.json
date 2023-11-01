@@ -1,8 +1,8 @@
 {
   "name": "dcl-edit-vscode",
-  "displayName": "dcl-edit-vscode",
-  "description": "",
-  "version": "0.0.1",
+  "displayName": "DCL-Edit in VSCode",
+  "description": "This extension allows you to download and start DCL-Edit in VSCode",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.83.0"
   },
