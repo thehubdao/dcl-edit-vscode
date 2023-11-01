@@ -80,39 +80,55 @@ export class Downloader {
     public static async download(version?: string) {
         if (!version) { throw new Error("Version not specified"); }
 
-        return new Promise<void>((resolve, reject) => {
+        vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: "Downloading dcl-edit version " + version,
+            cancellable: false
+        }, async (progress, token) => {
             // gather platform information
             var platformName = Downloader.getCurrentPlatform()?.platform;
-            if (!platformName) { reject("Platform not supported"); }
+            if (!platformName) {
+                console.error("Platform not supported");
+                return;
+            }
 
             // download the binary without the binary install package
             const link = `https://github.com/metagamehub/dcl-edit/releases/download/${version}/dcl-edit-${version}-${platformName}.tar.gz`;
             const folder = Downloader.getBinaryPath();
             const filePath = folder + `dcl-edit-${version}-${platformName}.tar.gz`;
 
+            progress.report({ increment: 40, message: "Downloading ..." });
+
             console.log('Downloading ' + link + ' to ' + filePath);
 
-            axios.get(link, { responseType: "arraybuffer" }).then(response => {
-                fs.writeFileSync(filePath, response.data);
+            const response = await axios.get(link, { responseType: "arraybuffer" });
+
+            progress.report({ increment: 40, message: "Decompressing ..." });
+
+            fs.writeFileSync(filePath, response.data);
+
+            await new Promise<void>((resolve, reject) => {
                 targz.decompress({
                     src: filePath,
                     dest: folder
                 }, (err) => {
                     if (err) {
                         this.onDidChangeDownload.fire();
+                        console.error(err);
                         reject(err);
                     } else {
-                        fs.rmSync(filePath);
-                        console.log("Downloaded dcl-edit version " + version + " to " + folder);
-                        this.onDidChangeDownload.fire();
                         resolve();
                     }
                 });
-            }).catch(error => {
-                this.onDidChangeDownload.fire();
-                reject(error);
             });
+
+            progress.report({ increment: 10, message: "Cleaning up ..." });
+            fs.rmSync(filePath);
+            console.log("Downloaded dcl-edit version " + version + " to " + folder);
+            this.onDidChangeDownload.fire();
         });
+
+
     }
 
     public static start(version?: string) {
@@ -123,7 +139,7 @@ export class Downloader {
 
         // start the binary
         console.log("Starting " + binaryPath + " with project path " + vscode.workspace.workspaceFolders![0].uri.fsPath);
-        cp.execFile(binaryPath, ["--projectPath", vscode.workspace.workspaceFolders![0].uri.fsPath],(error: cp.ExecFileException | null, stdout: string, stderr: string) => {
+        cp.execFile(binaryPath, ["--projectPath", vscode.workspace.workspaceFolders![0].uri.fsPath], (error: cp.ExecFileException | null, stdout: string, stderr: string) => {
             if (error) {
                 console.error(`dcl-edit error: ${error.message}`);
                 return;
