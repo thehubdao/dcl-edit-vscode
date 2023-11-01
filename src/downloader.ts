@@ -15,9 +15,9 @@ export class Downloader {
         this._context = context;
     }
 
-    private static getCurrentPlatform(): { platform: string, binary: string } | undefined {
-        let platformName = '';
-        let binaryName = '';
+    private static getCurrentPlatform(): { platform: "windows-x86" | "linux" | "macos" | "", binary: string } | undefined {
+        let platformName: "windows-x86" | "linux" | "macos" | "" = "";
+        let binaryName = "";
 
         const type = os.type();
         //const arch = os.arch();
@@ -137,9 +137,61 @@ export class Downloader {
         // get the path to the downloaded binary
         var binaryPath = this.getBinary(version);
 
+        // select graphics api
+        var graphicsParams: string[] = [];
+        const graphicsApi = vscode.workspace.getConfiguration('dcl-edit-vscode').get<string>('graphics-api') as "Auto" | "OpenGL" | "Vulkan" | "D11" | "D12" | "Metal";
+        const platform = this.getCurrentPlatform()?.platform;
+        switch (graphicsApi) {
+            case "OpenGL":
+                graphicsParams = ["-force-glcore"];
+                break;
+            case "Vulkan":
+                if (platform === "macos") {
+                    console.error("Vulkan is not supported on MacOS. Please use a different graphics api.");
+                    vscode.window.showErrorMessage("Vulkan is not supported on MacOS. Please use a different graphics api.", "Open Settings").then((value) => {
+                        if (value === "Open Settings") { vscode.commands.executeCommand("workbench.action.openSettings", "dcl-edit-vscode.graphics-api"); }
+                    });
+                    return;
+                }
+                graphicsParams = ["-force-vulkan"];
+                break;
+            case "D11":
+                if (platform !== "windows-x86") {
+                    console.error("DirectX 11 is only supported on Windows. Please use a different graphics api.");
+                    vscode.window.showErrorMessage("DirectX 11 is only supported on Windows. Please use a different graphics api.", "Open Settings").then((value) => {
+                        if (value === "Open Settings") { vscode.commands.executeCommand("workbench.action.openSettings", "dcl-edit-vscode.graphics-api"); }
+                    });
+                    return;
+                }
+                graphicsParams = ["-force-d3d11"];
+                break;
+            case "D12":
+                if (platform !== "windows-x86") {
+                    console.error("DirectX 12 is only supported on Windows. Please use a different graphics api.");
+                    vscode.window.showErrorMessage("DirectX 12 is only supported on Windows. Please use a different graphics api.", "Open Settings").then((value) => {
+                        if (value === "Open Settings") { vscode.commands.executeCommand("workbench.action.openSettings", "dcl-edit-vscode.graphics-api"); }
+                    });
+                    return;
+                }
+                graphicsParams = ["-force-d3d12"];
+                break;
+            case "Metal":
+                if (platform !== "macos") {
+                    console.error("Metal is only supported on MacOS. Please use a different graphics api.");
+                    vscode.window.showErrorMessage("Metal is only supported on MacOS. Please use a different graphics api.", "Open Settings").then((value) => {
+                        if (value === "Open Settings") { vscode.commands.executeCommand("workbench.action.openSettings", "dcl-edit-vscode.graphics-api"); }
+                    });
+                    return;
+                }
+                graphicsParams = ["-force-metal"];
+                break;
+            default:
+                break;
+        }
+
         // start the binary
         console.log("Starting " + binaryPath + " with project path " + vscode.workspace.workspaceFolders![0].uri.fsPath);
-        cp.execFile(binaryPath, ["--projectPath", vscode.workspace.workspaceFolders![0].uri.fsPath], (error: cp.ExecFileException | null, stdout: string, stderr: string) => {
+        cp.execFile(binaryPath, ["--projectPath", vscode.workspace.workspaceFolders![0].uri.fsPath, ...graphicsParams], (error: cp.ExecFileException | null, stdout: string, stderr: string) => {
             if (error) {
                 console.error(`dcl-edit error: ${error.message}`);
                 return;

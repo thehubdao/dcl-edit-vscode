@@ -29,9 +29,32 @@
         "properties": {
           "dcl-edit-vscode.version": {
             "type": "string",
+            "title": "Version",
             "default": "latest",
             "description": "The version of DCL Edit to use",
             "pattern": "^latest$|^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          },
+          "dcl-edit-vscode.graphics-api": {
+            "type": "string",
+            "title": "Graphics API",
+            "default": "Auto",
+            "description": "The graphics api to use",
+            "enum": [
+              "Auto",
+              "OpenGL",
+              "Vulkan",
+              "D11",
+              "D12",
+              "Metal"
+            ],
+            "enumDescriptions": [
+              "Automatically select the best graphics api for your system",
+              "OpenGL: Available on all platforms",
+              "Vulkan: Only available on Windows and Linux",
+              "DirectX 11: Only available on Windows",
+              "DirectX 12: Only available on Windows",
+              "Metal: Only available on macOS"
+            ]
           }
         }
       }
