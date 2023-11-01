@@ -8,7 +8,8 @@ window.addEventListener("load", () => {
     // register buttons
     getElementOptional("button-start")?.addEventListener("click", handleButtonStart);
     getElementOptional("button-download")?.addEventListener("click", handleButtonDownload);
-    getElement("version-select").addEventListener("change", handleOptionVersionChange);
+    getElementOptional("version-select")?.addEventListener("change", handleOptionVersionChange);
+    getElementOptional("button-open")?.addEventListener("click", handleButtonOpen);
 });
 
 function getElement(id: string): HTMLElement {
@@ -41,6 +42,12 @@ function handleButtonStart() {
 function handleButtonDownload() {
     vscode.postMessage({
         command: "dcl-edit-vscode.download"
+    });
+}
+
+function handleButtonOpen() {
+    vscode.postMessage({
+        command: "workbench.action.files.openFolder"
     });
 }
 

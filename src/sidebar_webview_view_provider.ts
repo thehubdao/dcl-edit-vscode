@@ -3,6 +3,7 @@ import { getUri } from "./utilities/get_uri";
 import { getNonce } from "./utilities/get_nonce";
 import { Downloader } from "./downloader";
 import { Version } from "./version";
+import { isDecentralandProject } from "./project";
 
 export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
 	private extensionUri: vscode.Uri;
@@ -114,10 +115,19 @@ export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	private _getApp(): string {
-		return /*html*/`
+		// check if the workspace is a decentraland project
+		if (!isDecentralandProject()) {
+			// display a message and a button to open a different folder
+			return /*html*/`
+				<p>Open a decentraland project to get started with dcl-edit</p>
+				<vscode-button id="button-open">Open Folder ...</vscode-button>
+			`;
+		} else {
+			return /*html*/`
 			${this._getVersionSelection()}
 			${this._getDownloadStartButton()}
 		`;
+		}
 	}
 	/*
 	Example:
@@ -177,12 +187,12 @@ export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
 	<vscode-button id="button-download">Download</vscode-button>
 	*/
 	private _getDownloadStartButton(): string {
-		if(Version.selectedVersion && Downloader.isDownloaded( Version.selectedVersion.getVersionString())){
+		if (Version.selectedVersion && Downloader.isDownloaded(Version.selectedVersion.getVersionString())) {
 			return /*html*/`
 				<p>The selected version of dcl-edit ready to start</p>
 				<vscode-button id="button-start">Start</vscode-button>
 			`;
-		}else{
+		} else {
 			return /*html*/`
 				<p>The selected version of dcl-edit needs to be downloaded</p>
 				<vscode-button id="button-download">Download</vscode-button>
