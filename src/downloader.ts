@@ -3,9 +3,12 @@ import * as os from 'os';
 import * as fs from 'fs';
 import axios from 'axios';
 import * as targz from 'targz';
+import { Version } from './version';
 
 export class Downloader {
     private static _context: vscode.ExtensionContext;
+    private static _selectedVersion: string;
+
     static init(context: vscode.ExtensionContext) {
         this._context = context;
     }
@@ -100,6 +103,18 @@ export class Downloader {
         });
     }
 
+    public static async findAllAvailable(): Promise<Version[]> {
+        const link = `https://api.github.com/repos/metagamehub/dcl-edit/releases`;
+        return new Promise<Version[]>((resolve, reject) => {
+            axios.get(link).then(response => {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                resolve(response.data.map((release: {tag_name:string}) => {return new Version(release.tag_name);}));
+            }).catch(error => {
+                reject(error);
+            });
+        });
+    }
+
     public static async clearDownloaded() {
         return new Promise<void>((resolve, reject) => {
             // clear the downloaded binary
@@ -109,5 +124,18 @@ export class Downloader {
                 resolve();
             });
         });
+    }
+
+    public static findAllDownloaded(): Version[] {
+        const binaryPath = this.getBinaryPath();
+        const folders = fs.readdirSync(binaryPath);
+        const dclEditFolders = folders.filter(folder => {
+            return folder.startsWith('dcl-edit-');
+        });
+        const versions = dclEditFolders.map(folder => {
+            const parts = folder.split('-');
+            return new Version(parts[2]);
+        });
+        return versions;
     }
 }

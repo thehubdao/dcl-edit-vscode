@@ -1,19 +1,37 @@
-import { provideVSCodeDesignSystem, vsCodeButton, Button } from "@vscode/webview-ui-toolkit";
+import { provideVSCodeDesignSystem, vsCodeButton, Button , vsCodeDropdown, vsCodeOption} from "@vscode/webview-ui-toolkit";
 
-provideVSCodeDesignSystem().register(vsCodeButton());
+provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeDropdown(), vsCodeOption());
 
 const vscode = acquireVsCodeApi();
 
 window.addEventListener("load", () => {
     // register buttons
-
-    const howdyButton = document.getElementById("howdy") as Button;
-    howdyButton?.addEventListener("click", handleHowdyClick);
+    getElement("button-start").addEventListener("click", handleButtonStart);
+    getElement("version-select").addEventListener("change", handleOptionVersionChange);
 });
 
-function handleHowdyClick() {
+function getElement(id: string): HTMLElement {
+    const button = document.getElementById(id);
+    if (!button) {
+        throw new Error(`Button with id ${id} not found`);
+    }
+    return button;
+}
+
+function getVersionOption(): string{
+    const option = getElement("version-select") as HTMLSelectElement;
+    return option.value;
+}
+
+function handleButtonStart() {
     vscode.postMessage({
-        command: "hello",
-        text: "Howdy from the webview!"
+        command: "dcl-edit-vscode.start"
     });
 }
+
+function handleOptionVersionChange() {
+    vscode.postMessage({
+        version: getVersionOption()
+    });
+}
+
