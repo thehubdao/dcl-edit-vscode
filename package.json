@@ -2,7 +2,7 @@
   "name": "dcl-edit-vscode",
   "displayName": "DCL-Edit in VSCode",
   "description": "This extension allows you to download and start DCL-Edit in VSCode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "cblech",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -22,7 +22,7 @@
   "main": "./out/extension.js",
   "contributes": {
     "menus": {
-      "view/title":[
+      "view/title": [
         {
           "command": "dcl-edit-vscode.clearCache",
           "title": "Clear Download Cache",
