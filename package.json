@@ -14,6 +14,19 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": [
+      {
+        "title": "Dcl Edit",
+        "properties": {
+          "dcl-edit-vscode.version": {
+            "type": "string",
+            "default": "latest",
+            "description": "The version of DCL Edit to use",
+            "pattern": "^latest$|^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          }
+        }
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {

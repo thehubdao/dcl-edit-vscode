@@ -2,17 +2,17 @@ import { Downloader } from "./downloader";
 import * as vscode from 'vscode';
 
 export class Version {
-    private static _selectedVersion?: Version;
     private static _newestVersion?: Version;
     private static _availableVersions: Version[];
 
     public static set selectedVersion(version: Version) {
-        Version._selectedVersion = version;
-        Version.onDidChangeVersion.fire();
+        vscode.workspace.getConfiguration().update('dcl-edit-vscode.version', version.get(), vscode.ConfigurationTarget.Global).then(() => {
+            Version.onDidChangeVersion.fire();
+        });
     }
 
     public static get selectedVersion(): Version | undefined {
-        return Version._selectedVersion;
+        return new Version(vscode.workspace.getConfiguration().get<string>('dcl-edit-vscode.version') ?? 'latest');
     }
 
     public static set newestVersion(version: Version) {

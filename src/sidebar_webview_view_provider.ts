@@ -19,19 +19,19 @@ export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
 			enableScripts: true,
 			localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, "out")]
 		};
-		
+
 		this.updateWebview();
 
 		// Handle messages from the webview
 		this._view.webview.onDidReceiveMessage((message) => {
 			console.log('Received message');
 
-			if(message.command){
+			if (message.command) {
 				console.log('Received command: ' + message.command);
 				vscode.commands.executeCommand(message.command);
 			}
 
-			if(message.version){
+			if (message.version) {
 				console.log('Received version: ' + message.version);
 				Version.selectedVersion = new Version(message.version);
 			}
@@ -108,15 +108,23 @@ export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
         `;
 	}
 
-	private _getApp():string{
+	private _getApp(): string {
 		return /*html*/`
-			<p>This is a very cool text. I hope every body is doing fine</p>
-			<vscode-button id="button-start">Start</vscode-button>
 			${this._getVersionSelection()}
+			${this._getDownloadStartButton()}
 		`;
 	}
-
-	private _getVersionSelection():string{
+	/*
+	Example:
+	<p>Select version:</p>
+	<vscode-dropdown id="version-select">
+		<vscode-option value="latest">latest</vscode-option>
+		<vscode-option value="3.0.0" selected>3.0.0</vscode-option>
+		<vscode-option value="2.0.0">2.0.0</vscode-option>
+		<vscode-option value="1.0.0">1.0.0</vscode-option>
+	</vscode-dropdown>
+	*/
+	private _getVersionSelection(): string {
 		return /*html*/`
 			<p>Select version:</p>
 			<vscode-dropdown id="version-select">
@@ -125,19 +133,40 @@ export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
 		`;
 	}
 
-	private _getVersionOptions():string{
+	/*
+	Example:
+	<vscode-option value="latest">latest</vscode-option>
+	<vscode-option value="3.0.0" selected>3.0.0</vscode-option>
+	<vscode-option value="2.0.0">2.0.0</vscode-option>
+	<vscode-option value="1.0.0">1.0.0</vscode-option>
+	*/
+	private _getVersionOptions(): string {
 		const selectedVersion = Version.selectedVersion;
-		const versions = Version.availableVersions;
+		const versions = [new Version("latest")].concat(Version.availableVersions);
 		return versions.map((version) => this._getVersionOption(version, selectedVersion)).join('');
 	}
 
-	private _getVersionOption(version:Version, selectedVersion?: Version):string{
+	/*
+	Example for input: {version: "3.0.0", selectedVersion: "3.0.0"}
+	<vscode-option value="3.0.0" selected>3.0.0</vscode-option>
+	Example for input: {version: "latest", selectedVersion: "2.0.0"}
+	<vscode-option value="latest">latest</vscode-option>
+	*/
+	private _getVersionOption(version: Version, selectedVersion?: Version): string {
 		return /*html*/`
-		<vscode-option value="${version.get()}" ${ selectedVersion && version.isVersionStringEqual(selectedVersion)?"selected":""}>${version.get()}</vscode-option>
+		<vscode-option value="${version.get()}" ${selectedVersion && version.isVersionStringEqual(selectedVersion) ? "selected" : ""}>${version.get()}</vscode-option>
 		`;
 	}
 
-	private _getDownloadStartButton():string{
+	/*
+	Example if downloaded:
+	<p>The selected version of dcl-edit ready to start</p>
+	<vscode-button id="button-start">Start</vscode-button>
+	Example if not downloaded:
+	<p>The selected version of dcl-edit needs to be downloaded</p>
+	<vscode-button id="button-download">Download</vscode-button>
+	*/
+	private _getDownloadStartButton(): string {
 		//Downloader.isDownloaded()
 		return /*html*/`
 			<vscode-button id="button-start">Start</vscode-button>
