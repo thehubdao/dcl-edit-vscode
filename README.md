@@ -20,7 +20,7 @@ This extension allows you to download and install DCL-Edit, a scene editor for D
 
 ## License
 
-This extension is licensed under the [MIT License](LICENSE.md).
+This extension is licensed under the MIT License.
 
 ## Support
 
