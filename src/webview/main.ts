@@ -6,7 +6,8 @@ const vscode = acquireVsCodeApi();
 
 window.addEventListener("load", () => {
     // register buttons
-    getElement("button-start").addEventListener("click", handleButtonStart);
+    getElementOptional("button-start")?.addEventListener("click", handleButtonStart);
+    getElementOptional("button-download")?.addEventListener("click", handleButtonDownload);
     getElement("version-select").addEventListener("change", handleOptionVersionChange);
 });
 
@@ -14,6 +15,14 @@ function getElement(id: string): HTMLElement {
     const button = document.getElementById(id);
     if (!button) {
         throw new Error(`Button with id ${id} not found`);
+    }
+    return button;
+}
+
+function getElementOptional(id: string): HTMLElement |undefined{
+    const button = document.getElementById(id);
+    if (!button) {
+        return undefined;
     }
     return button;
 }
@@ -26,6 +35,12 @@ function getVersionOption(): string{
 function handleButtonStart() {
     vscode.postMessage({
         command: "dcl-edit-vscode.start"
+    });
+}
+
+function handleButtonDownload() {
+    vscode.postMessage({
+        command: "dcl-edit-vscode.download"
     });
 }
 

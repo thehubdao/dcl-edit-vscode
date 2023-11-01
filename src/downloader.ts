@@ -70,7 +70,9 @@ export class Downloader {
         return fs.existsSync(this.getSpecificBinaryPath(version));
     }
 
-    public static async download(version: string) {
+    public static async download(version?: string) {
+        if (!version) {throw new Error("Version not specified");}
+
         return new Promise<void>((resolve, reject) => {
             // gather platform information
             var platformName = Downloader.getCurrentPlatform();

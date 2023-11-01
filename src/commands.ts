@@ -1,8 +1,9 @@
 import { Downloader } from "./downloader";
+import { Version } from "./version";
 
 export function download() {
     console.log('executing command: download');
-    Downloader.download("3.0.0");
+    Downloader.download(Version.selectedVersion?.getVersionString());
 }
 
 export function start() {

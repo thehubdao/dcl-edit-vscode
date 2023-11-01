@@ -91,8 +91,8 @@ export class Version {
     }
 
 
-    isVersionStringEqual(selectedVersion: Version): boolean {
-        return this.getVersionString() === selectedVersion.getVersionString();
+    isStringEqual(selectedVersion: Version): boolean {
+        return this.get() === selectedVersion.get();
     }
 
     public static parse(version: string): number[] {

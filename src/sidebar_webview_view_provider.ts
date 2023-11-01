@@ -153,8 +153,13 @@ export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
 	<vscode-option value="latest">latest</vscode-option>
 	*/
 	private _getVersionOption(version: Version, selectedVersion?: Version): string {
+		const isSelected = selectedVersion && version.isStringEqual(selectedVersion);
+		const isSelectedTag = isSelected ? "selected" : "";
+		const isDownloaded = Downloader.isDownloaded(version.getVersionString());
+		const isDownloadedTag = isDownloaded ? "(downloaded)" : "";
+		
 		return /*html*/`
-		<vscode-option value="${version.get()}" ${selectedVersion && version.isVersionStringEqual(selectedVersion) ? "selected" : ""}>${version.get()}</vscode-option>
+		<vscode-option value="${version.get()}" ${isSelectedTag}>${version.get()} ${isDownloadedTag}</vscode-option>
 		`;
 	}
 
@@ -167,9 +172,16 @@ export class SidebarWebviewViewProvider implements vscode.WebviewViewProvider {
 	<vscode-button id="button-download">Download</vscode-button>
 	*/
 	private _getDownloadStartButton(): string {
-		//Downloader.isDownloaded()
-		return /*html*/`
-			<vscode-button id="button-start">Start</vscode-button>
-		`;
+		if(Version.selectedVersion && Downloader.isDownloaded( Version.selectedVersion.getVersionString())){
+			return /*html*/`
+				<p>The selected version of dcl-edit ready to start</p>
+				<vscode-button id="button-start">Start</vscode-button>
+			`;
+		}else{
+			return /*html*/`
+				<p>The selected version of dcl-edit needs to be downloaded</p>
+				<vscode-button id="button-download">Download</vscode-button>
+			`;
+		}
 	}
 }
