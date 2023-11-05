@@ -11,7 +11,7 @@
     "url": "https://github.com/thehubdao/dcl-edit-vscode"
   },
   "engines": {
-    "vscode": "^1.83.0"
+    "vscode": "^1.53.0"
   },
   "categories": [
     "Other"
@@ -121,7 +121,7 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
     "@types/targz": "^1.0.3",
-    "@types/vscode": "^1.83.0",
+    "@types/vscode": "^1.53.0",
     "@types/vscode-webview": "^1.57.3",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
